@@ -88,21 +88,11 @@ def notify_user(form_data: dict) -> None:
         logger.exception("Failed to get Postmark token: %s", e)
         return
 
-    subject = "Thanks for joining the Margana early adoption list"
-    text_body = (
-        f"Hi {first_name or 'there'},\n\n"
-        "Thanks for registering your interest in Margana.\n"
-        "We’ll be in touch with early access details soon.\n\n"
-        "If you didn’t request this, you can ignore this email.\n\n"
-        "– The Margana team\n"
-    )
-
     payload = {
         "From": FROM_EMAIL,      # must match a verified sender in Postmark
         "To": user_email,
         "TemplateAlias": "margana-adopters-request",
-        "Subject": subject,
-        "TextBody": text_body,
+        "TemplateModel": {},
         "MessageStream": "outbound",  # or your custom stream name
     }
 

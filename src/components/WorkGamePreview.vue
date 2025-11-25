@@ -176,11 +176,11 @@
                 </button>
                 <button
                   type="submit"
-                  :disabled="!isValid"
-                  :aria-disabled="!isValid"
+                  :disabled="!isValid || isSubmitting"
+                  :aria-disabled="!isValid || isSubmitting"
                   class="rounded-lg bg-gradient-to-tr from-purple-500 to-orange-500 px-4 py-2 text-xs font-semibold text-white shadow-[0_10px_24px_rgba(236,72,153,0.22)] transition hover:from-purple-400 hover:to-orange-400 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-purple-400/60"
                 >
-                  Submit
+                  {{ isSubmitting ? 'Submitting…' : 'Submit' }}
                 </button>
               </div>
             </form>
@@ -212,6 +212,9 @@ const triggerBtn = ref(null)
 const firstInput = ref(null)
 let dismissTimer = null
 const API_URL = 'https://1uyuyru13f.execute-api.eu-west-2.amazonaws.com/prod/early_adoption_form' // your API Gateway endpoint
+
+// Track submission in progress to prevent double submits and disable the button immediately
+const isSubmitting = ref(false)
 
 const form = ref({
   firstName: '',
@@ -260,7 +263,9 @@ function onKeydown(e) {
 }
 
 async function submitForm() {
-  if (!isValid.value) return
+  if (!isValid.value || isSubmitting.value) return
+
+  isSubmitting.value = true
 
   // form is a ref → the actual object is in form.value
   const payload = { ...form.value }
@@ -291,6 +296,9 @@ async function submitForm() {
   } catch (error) {
     console.error('Error submitting form to Lambda:', error)
     // optional: show an error message in the UI here
+  } finally {
+    // Re-enable the button in case of error; harmless after success as the form view is replaced
+    isSubmitting.value = false
   }
 }
 
